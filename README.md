@@ -10,11 +10,11 @@
 
 ### Anggota Kelompok
 
-1. **Afif Nur Rahman** — H1H024016
-2. **Ardina Jihan Mariska** — H1H024018
-3. **Ardhis Alivio Rajendra** — H1H024031
-4. **Nesa Dwi Cahyani** — H1H024024
-5. **Javier Anthonio Justiansah** — H1H024026
+1. **Afif Nur Rahman** - H1H024016
+2. **Ardina Jihan Mariska** - H1H024018
+3. **Ardhis Alivio Rajendra** - H1H024031
+4. **Nesa Dwi Cahyani** - H1H024024
+5. **Javier Anthonio Justiansah** - H1H024026
 
 ---
 
