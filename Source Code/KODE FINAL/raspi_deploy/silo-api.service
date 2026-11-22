@@ -1,0 +1,15 @@
+[Unit]
+Description=Silo Monitoring Go API + SQLite
+After=network.target mosquitto.service
+Wants=network.target
+
+[Service]
+Type=simple
+User=kelompok2
+WorkingDirectory=/home/kelompok2/Silo_ESP_RASPI/backend
+ExecStart=/home/kelompok2/Silo_ESP_RASPI/backend/silo-api-arm64
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target

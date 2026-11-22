@@ -1,0 +1,14 @@
+[Unit]
+Description=Cloudflare Quick Tunnel for Silo Dashboard + API (:8080)
+After=network.target nginx.service
+Wants=network.target
+
+[Service]
+Type=simple
+User=kelompok2
+ExecStart=/usr/local/bin/cloudflared tunnel --no-autoupdate --url http://127.0.0.1:8080
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

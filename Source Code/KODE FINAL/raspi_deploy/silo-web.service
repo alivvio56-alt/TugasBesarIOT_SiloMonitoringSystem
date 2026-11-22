@@ -1,0 +1,15 @@
+[Unit]
+Description=Silo Monitoring Laravel Dashboard
+After=network.target silo-api.service
+Wants=network.target
+
+[Service]
+Type=simple
+User=kelompok2
+WorkingDirectory=/home/kelompok2/Silo_ESP_RASPI/frontend
+ExecStart=/usr/bin/php artisan serve --host=0.0.0.0 --port=8000
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target
