@@ -43,8 +43,10 @@ Selain pengendalian otomatis, sistem dirancang memiliki dashboard berbasis web y
 |---|---|
 | ESP32 | Mikrokontroler dan pemrosesan data sensor |
 | DHT22 | Mengukur suhu dan kelembapan udara |
-| MQ135 | Mendeteksi perubahan kualitas udara |
+| MQ-2 | Mendeteksi perubahan kualitas udara |
 | Relay | Mengendalikan kipas secara ON/OFF |
+| HC-SR04 | Mengendalikan jarak conveyor |
+| Webcam USB | Memindai QR code |
 | Motor DC | Simulasi kipas atau ventilasi |
 | LED | Indikator kondisi sistem |
 | Buzzer | Alarm peringatan |
