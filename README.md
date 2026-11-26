@@ -1,4 +1,4 @@
-# Sistem Monitoring dan Pengendalian Kondisi Lingkungan Silo Penyimpanan Gandum
+# Sistem Monitoring & Pengendalian Silo Raw Material dengan Smart Conveyor PID Berbasis IoT
 
 ## Identitas Kelompok
 
@@ -8,115 +8,96 @@
 | Kelas | A |
 | Mata Kuliah | Internet of Things (IoT) |
 
-### Anggota Kelompok
+### Anggota Kelompok & Peran
 
-1. **Afif Nur Rahman** - H1H024016
-2. **Ardina Jihan Mariska** - H1H024018
-3. **Ardhis Alivio Rajendra** - H1H024031
-4. **Nesa Dwi Cahyani** - H1H024024
-5. **Javier Anthonio Justiansah** - H1H024026
+| No | Nama | NIM | Peran Utama |
+|---|---|---|---|
+| 1 | **Afif Nur Rahman** | H1H024016 | Pemrograman Raspberry Pi 3, *vision* QR (Python), UART-MQTT, & PID *conveyor* |
+| 2 | **Ardina Jihan Mariska** | H1H024018 | Pengembangan web *dashboard* Laravel, integrasi REST API Go, & fitur kendali |
+| 3 | **Nesa Dwi Cahyani** | H1H024024 | Perancangan awal & pengembangan antarmuka web Laravel, *tracking*, & kendali |
+| 4 | **Javier Antonio Justiansah** | H1H024026 | Mekanikal *conveyor*, diagram blok sistem, skenario pengujian, & dokumentasi |
+| 5 | **Ardhis Alivio Rajendra** | H1H024031 | *Wiring hardware*, desain & cetak *enclosure*, akuisisi sensor/aktuator, & mekanik |
 
 ---
 
 ## Deskripsi Proyek
 
-Proyek ini merupakan pengembangan sistem berbasis **Internet of Things (IoT)** untuk melakukan monitoring dan pengendalian kondisi lingkungan pada silo penyimpanan bahan baku.
+Sistem berbasis **Internet of Things (IoT)** dan **Sistem Kendali** untuk memantau kondisi lingkungan silo bahan baku sekaligus mengotomatisasi pelacakan barang masuk (*traceability*) melalui *smart conveyor*.
 
-Sistem dirancang menggunakan ESP32 sebagai mikrokontroler utama yang terhubung dengan sensor DHT22 untuk membaca suhu dan kelembapan udara, serta sensor MQ135 untuk mendeteksi perubahan kualitas udara.
-
-Data hasil pembacaan sensor diproses untuk menentukan kondisi lingkungan ke dalam tiga kategori, yaitu **NORMAL, WARNING, dan CRITICAL**. Berdasarkan kondisi tersebut, sistem dapat mengendalikan kipas ventilasi melalui relay serta memberikan indikator peringatan menggunakan LED dan buzzer.
-
-Selain pengendalian otomatis, sistem dirancang memiliki dashboard berbasis web yang memungkinkan pengguna memantau kondisi lingkungan dan mengendalikan kipas secara manual maupun otomatis melalui komunikasi MQTT.
+- **Lingkungan Silo (ESP32):** Memantau suhu, kelembapan (DHT22), dan gas (MQ-2 dengan filter EMA) untuk mengatur 2 kipas *exhaust* (relay) serta katup ventilasi (servo SG90) dengan logika histeresis.
+- **Smart Conveyor & Vision QR (ESP32 + Raspi 3):** Menghentikan kotak tepat di bawah *webcam* menggunakan PID diskrit (HC-SR04 & L298N), memindai QR Code dengan OpenCV + pyzbar, menyalakan LED indikator (`VALID`/`INVALID`), lalu memasukkan barang valid ke silo.
+- **Web Dashboard & Server Lokal:** Menyajikan monitoring *real-time*, riwayat *tracking* beserta foto bukti, *live* kamera, dan kendali perangkat jarak jauh menggunakan Go API, SQLite, Laravel, Mosquitto MQTT, Nginx, dan Cloudflare Tunnel.
 
 ## Tujuan Proyek
 
-1. Memantau suhu dan kelembapan lingkungan di dalam silo.
-2. Mendeteksi perubahan kualitas udara menggunakan sensor MQ135.
-3. Mengidentifikasi kondisi lingkungan berdasarkan tingkat risiko.
-4. Mengendalikan sistem ventilasi secara otomatis maupun manual.
-5. Menyediakan dashboard untuk monitoring dan pengendalian jarak jauh.
-6. Mengembangkan penyimpanan data historis dan sistem kendali PID.
+1. Memantau suhu, kelembapan, dan indikator gas silo secara *real-time*.
+2. Mengendalikan kipas dan katup ventilasi secara otomatis (histeresis) maupun manual.
+3. Mengatur posisi henti *conveyor* secara presisi menggunakan kendali PID diskrit.
+4. Melacak identitas bahan baku melalui pemindaian QR Code beserta tangkapan foto bukti.
+5. Menyediakan tampilan lokal (LCD & LED) serta *dashboard* web terintegrasi.
 
 ## Komponen dan Teknologi
 
-| Komponen / Teknologi | Fungsi |
-|---|---|
-| ESP32 | Mikrokontroler dan pemrosesan data sensor |
-| DHT22 | Mengukur suhu dan kelembapan udara |
-| MQ-2 | Mendeteksi perubahan kualitas udara |
-| Relay | Mengendalikan kipas secara ON/OFF |
-| HC-SR04 | Mengendalikan jarak conveyor |
-| Webcam USB | Memindai QR code |
-| Motor DC | Simulasi kipas atau ventilasi |
-| LED | Indikator kondisi sistem |
-| Buzzer | Alarm peringatan |
-| MQTT / HiveMQ | Komunikasi data dan perintah kontrol |
-| HTML, CSS, JavaScript | Pengembangan dashboard web |
-| Laravel | Rencana pengembangan backend |
-| SQLite | Rencana penyimpanan data historis |
+| Komponen / Teknologi | Spesifikasi / Pin | Fungsi |
+|---|---|---|
+| **ESP32 DevKit** | Dual-core, UART2 (`RX=32`, `TX=33`) | Pengendali sensor, histeresis, PID, LCD, & LED |
+| **Raspberry Pi 3 Model B** | UART (`Pin 8/10`), USB, Wi-Fi | *Gateway* UART-MQTT, *vision* QR, & *host* server |
+| **DHT22** | GPIO 4 | Sensor suhu (Celcius) dan kelembapan (%RH) |
+| **MQ-2** | GPIO 34 (ADC) | Sensor indikator gas (dengan filter EMA) |
+| **HC-SR04** | TRIG 16, ECHO 17 | Sensor jarak umpan balik PID *conveyor* |
+| **Webcam USB** | 640x360 MJPG, fokus manual | Deteksi ROI *conveyor* & pemindai QR Code |
+| **L298N + Motor DC** | ENA 25, IN1 26, IN2 27 | Penggerak PWM (62-125) & rem aktif *conveyor* |
+| **Relay + 2x Fan DC 12V** | GPIO 19 (logika NC) | Sakelar ON/OFF kipas *exhaust* silo |
+| **Servo SG90** | GPIO 18 | Penggerak katup ventilasi (0 / 90 derajat) |
+| **LCD 16x2 I2C** | SDA 21, SCL 22 (`0x27`) | Tampilan status sensor, aktuator, & hasil *scan* |
+| **LED Hijau & Merah** | GPIO 13 & GPIO 14 | Indikator hasil *scan* QR (`VALID`/`INVALID`) |
+| **Adaptor + 2x Step-Down** | 12V & 2x 5V LM2596 | Rel daya terpisah untuk motor/kipas & logika |
+| **Python (OpenCV + pyzbar)** | *Service* `silo-bridge` | *Bridge* UART2, deteksi ROI/QR, *live cam*, MQTT |
+| **Mosquitto MQTT** | Port 1883 (3 topik) | *Broker* pesan lokal (telemetri, *scan*, kontrol) |
+| **Go API + SQLite** | Port 3000 | REST API & penyimpanan riwayat data serta foto |
+| **Laravel + Nginx** | Port 8000 / Proxy 8080 | *Dashboard* web, *tracking*, & kendali perangkat |
 
 ## Mekanisme Kerja Sistem
 
-1. ESP32 membaca data suhu, kelembapan, dan kualitas udara dari sensor.
-2. Data sensor diproses oleh ESP32 untuk menentukan kondisi lingkungan.
-3. Sistem mengklasifikasikan kondisi menjadi NORMAL, WARNING, atau CRITICAL.
-4. Berdasarkan kondisi tersebut, ESP32 mengendalikan kipas ventilasi, LED, dan buzzer.
-5. Data monitoring dikirimkan melalui MQTT menuju dashboard.
-6. Pengguna dapat memantau kondisi silo dan memberikan perintah FAN ON, FAN OFF, atau AUTO MODE melalui dashboard.
+1. **Kendali Lingkungan Silo (Histeresis):** ESP32 membaca DHT22 dan MQ-2 (filter EMA). Kipas menyala otomatis jika suhu > 28 C (mati < 27 C) atau gas > 2000 ADC (pulih < 1800 ADC). Servo membuka ventilasi (90 derajat) jika alarm gas aktif atau kelembapan < 50% (tutup kembali saat >= 70% atau > 80%).
+2. **Kendali PID Conveyor:** HC-SR04 mendeteksi kotak di zona awal (<= 17,5 cm), menunggu jeda 2 detik, lalu PID (`Kp=6,5`, `Ki=0,45`, `Kd=4,0`, interval 60 ms) memodulasi PWM L298N (62-125) agar *conveyor* melambat halus dan berhenti di *setpoint* 20,5 cm (toleransi +/- 0,4 cm) dengan rem aktif.
+3. **Validasi QR Code (Computer Vision):** Saat berhenti, ESP32 mengirim permintaan *scan* via UART2 ke Raspberry Pi 3. Kamera memeriksa ROI (terlatih untuk kondisi *belt* kosong, QR valid, dan benda acak/invalid). Jika **VALID**, LED Hijau menyala 2 detik, LCD menampilkan status valid, data + foto tersimpan, lalu *conveyor* berjalan 2 detik memasukkan barang ke silo. Jika **INVALID**, LED Merah menyala dan *conveyor* berhenti sampai barang diangkat.
+4. **Komunikasi MQTT & Web:** Raspberry Pi mem-publish 2 topik (telemetri data & hasil *scan*) dan men-subscribe 1 topik (kontrol) melalui Mosquitto MQTT; sebaliknya *backend* Go men-subscribe telemetri/*scan* untuk disimpan ke SQLite dan mem-publish perintah kontrol dari *dashboard* Laravel.
 
 ## Arsitektur Sistem
 
-Sistem terdiri dari tiga bagian utama:
-
-- **Perangkat Keras:** ESP32, sensor DHT22, sensor MQ135, relay, motor DC, LED, dan buzzer.
-- **Komunikasi:** MQTT menggunakan broker HiveMQ untuk pertukaran data monitoring dan perintah kontrol.
-- **Aplikasi:** Dashboard web untuk menampilkan informasi sensor dan menyediakan kontrol kipas.
+- **Field Layer (ESP32):** Akuisisi sensor (DHT22, MQ-2, HC-SR04), kendali histeresis & PID, LCD 16x2, dan LED indikator.
+- **Edge & Gateway Layer (Raspi 3):** Komunikasi UART2 (`115200 bps`), *computer vision* QR + *live streaming*, dan *broker* Mosquitto MQTT.
+- **Application Layer:** Go API + SQLite, *Web Dashboard* Laravel (`Silo SCM`), dan Nginx (*auto-start* `systemd`).
 
 ## Status Pengembangan
 
 | Bagian | Status |
 |---|---|
-| Rancangan rangkaian ESP32 dan sensor | Selesai pada simulasi |
-| Pembacaan dan pemrosesan sensor | Dirancang |
-| Klasifikasi kondisi lingkungan | Dirancang |
-| Kendali kipas ON/OFF | Dirancang pada simulasi |
-| Indikator LED dan buzzer | Dirancang pada simulasi |
-| Komunikasi MQTT | Jalur komunikasi dirancang |
-| Dashboard monitoring | Prototipe telah dibuat |
-| Integrasi perangkat fisik | Dalam pengembangan |
-| Kendali PID menggunakan PWM | Rencana pengembangan |
-| Backend Laravel dan database SQLite | Rencana pengembangan |
-
-**Catatan:** Status di atas menggambarkan progress pengembangan berdasarkan laporan proyek. Implementasi fisik, pengujian komunikasi secara menyeluruh, dan validasi parameter sensor masih menjadi bagian dari pekerjaan berikutnya.
+| Desain skematik, *enclosure control box*, & perakitan fisik silo + *conveyor* | Selesai |
+| Akuisisi sensor DHT22, MQ-2 (EMA), dan HC-SR04 (median filter) | Selesai |
+| Kendali histeresis kipas & servo serta PID *conveyor* (*anti-stall* + rem aktif) | Selesai |
+| Tampilan lokal LCD 16x2 I2C dan indikator LED Valid/Invalid | Selesai |
+| Integrasi UART2 ESP32 - Raspi 3 dan *computer vision* QR + foto bukti | Selesai |
+| Layanan lokal Mosquitto MQTT, Go API + SQLite, dan Dashboard Laravel | Selesai |
+| Konfigurasi *auto-start* (`systemd`) dan pengujian sistem terintegrasi | Selesai |
 
 ## Dokumentasi
 
-### Simulasi Rangkaian
+### Video Presentasi & Demonstrasi Lengkap
 
-Simulasi rangkaian perangkat keras menggunakan Cirkit Designer.
+[**Tonton Video Presentasi Kelompok (YouTube)**](https://youtu.be/JVmAXdI7Zao)
+
+### Simulasi Rangkaian Awal
 
 [**Lihat Simulasi Rangkaian Cirkit Designer**](https://app.cirkitdesigner.com/project/09ebd522-7023-452e-b6f0-0ca62a58bb7d)
 
-### Dashboard
+### Fitur Dashboard Web (`Silo SCM`)
 
-Dashboard dirancang menggunakan HTML, CSS, dan JavaScript dengan komunikasi MQTT/WebSocket. Dashboard menampilkan:
-
-- Suhu lingkungan.
-- Kelembapan udara.
-- Nilai pembacaan sensor gas.
-- Status kondisi lingkungan.
-- Status kipas ventilasi.
-- Kontrol FAN ON, FAN OFF, dan AUTO MODE.
-
-## Rencana Pengembangan Selanjutnya
-
-1. Melakukan perakitan dan pengujian perangkat keras secara fisik.
-2. Memvalidasi parameter sensor dan batas kondisi lingkungan.
-3. Mengintegrasikan ESP32 dengan dashboard melalui MQTT.
-4. Mengembangkan backend menggunakan Laravel.
-5. Mengintegrasikan database SQLite untuk penyimpanan data historis.
-6. Mengembangkan kendali PID untuk pengaturan ventilasi berdasarkan kondisi lingkungan.
-7. Melakukan pengujian sistem secara menyeluruh.
+- **Ringkasan:** Menampilkan status perangkat (*online*/*offline*), pembacaan *real-time* suhu, kelembapan, gas ADC, dan jarak beserta indikator kondisi (`NORMAL`, `WARNING`, `CRITICAL`), grafik tren suhu & kelembapan (filter `1 jam`, `6 jam`, `24 jam`, `3 hari`), grafik batang indikator gas dengan garis batas kritis (2500), persentase level gas, daftar *batch* terbaru, serta log kejadian (*conveyor*, barang masuk, dan perubahan mode).
+- **Riwayat Tracking:** Tabel *batch* barang valid yang masuk otomatis (foto, ID box, varietas, proses, *grade*, berat, silo tujuan, dan waktu) dilengkapi halaman **Detail Lengkap** berisi nomor lot, kode FRM, kadar air, koordinat & ketinggian (tautan Google Maps), tangkapan foto bukti saat valid, serta data mentah JSON perangkat.
+- **Kendali Perangkat:** Pengaturan mode `Otomatis` (berbasis sensor ESP32) dan `Manual` (sakelar langsung untuk kipas, ventilasi, dan *conveyor*) lengkap dengan panel pembacaan sensor langsung secara *real-time*.
+- **Live Kamera:** *Streaming* area *conveyor* dan ROI deteksi QR, status perangkat keras (state ESP32, jarak, PWM, status LED, jumlah valid/invalid), serta tombol kalibrasi *belt* kosong dan pengaturan fokus/pencahayaan lensa.
 
 ---
 
